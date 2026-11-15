@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gastos da Casa</title>
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#17202A" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gastos da Casa">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="estilo.css?v=9">
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <h1>Gastos da <b>Casa</b></h1>
+  <div class="top-acoes">
+    <button id="ajustes-btn" class="icon sm" data-act="ir" data-v="ajustes" aria-label="Ajustes: categorias, cartões, fixos e aparência" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button id="quem-btn" class="quem" data-act="ir" data-v="conta" hidden></button>
+  </div>
+</div></header>
+<div id="sem-backend" class="wrap" hidden><div class="card note" style="margin-top:16px"><strong>Falta ligar o app ao backend.</strong> Abra o arquivo <code>config.js</code> no GitHub e cole o link <code>/exec</code> do Apps Script em <code>backendUrl</code>.</div></div>
+
+<main class="wrap" id="app">
+  <!-- ENTRAR -->
+  <section id="v-entrar" class="view" hidden>
+    <form id="f-entrar" class="card" autocomplete="on">
+      <h2 id="e-titulo">Entrar</h2>
+      <p id="e-texto" class="muted small"></p>
+      <div class="field" id="e-codigo-wrap" hidden><label for="e-codigo">Código do convite</label><input id="e-codigo" type="text" autocomplete="off" autocapitalize="characters" placeholder="Ex.: K7MP2QXA" maxlength="12"></div>
+      <div class="field" id="e-nome-wrap"><label for="e-nome">Seu nome</label><input id="e-nome" type="text" placeholder="Ex.: Renato" autocomplete="username" maxlength="30"></div>
+      <div class="field"><label for="e-senha" id="e-senha-rot">Senha</label><input id="e-senha" type="password" autocomplete="current-password" required></div>
+      <div class="field" id="e-conf-wrap" hidden><label for="e-conf">Repita a senha</label><input id="e-conf" type="password" autocomplete="new-password"></div>
+      <p id="e-erro" class="erro" hidden></p>
+      <button class="btn primary big" type="submit" id="e-botao">Entrar</button>
+      <button class="btn ghost" type="button" id="e-troca" data-act="modo-convite">Recebi um convite</button>
+    </form>
+  </section>
+
+  <!-- MERCADO -->
+  <section id="v-mercado" class="view" hidden>
+    <!-- sem compra em andamento: lista + começar -->
+    <div id="mk-planejar" class="view">
+      <div class="seg" role="group" aria-label="Mercado">
+        <button data-act="mk-aba" data-aba="lista" aria-pressed="true">Lista de compras</button>
+        <button data-act="mk-aba" data-aba="hist" aria-pressed="false">Histórico</button>
+      </div>
+
+      <div id="mk-aba-lista" class="view">
+      <div class="sum"><h2>Lista de compras</h2><span id="mk-lista-sum" class="muted small"></span></div>
+      <form id="f-lista" class="card" autocomplete="off">
+        <div class="row-form">
+          <div class="field grow"><label for="l-nome">Item</label><input id="l-nome" type="text" placeholder="Ex.: leite, arroz 5kg, banana" list="dl-produtos" maxlength="80"></div>
+          <div class="field" style="width:72px"><label for="l-qtd">Qtd.</label><input id="l-qtd" type="text" inputmode="decimal" value="1"></div>
+          <button class="btn primary" type="submit" aria-label="Adicionar à lista">+</button>
+        </div>
+      </form>
+      <div class="card"><div id="mk-lista"></div></div>
+      <div id="mk-sug-card" class="card" hidden>
+        <div class="sum"><div><h3>Sugestões das compras anteriores</h3><div id="mk-sug-sum" class="small muted"></div></div><button type="button" class="btn ghost" data-act="mk-sug-todos" data-confirm="Toque de novo para adicionar todos">Adicionar todos</button></div>
+        <div id="mk-sug"></div>
+      </div>
+      </div>
+
+      <div id="mk-aba-hist" class="view" hidden>
+        <div class="seg" role="group" aria-label="Tipo de histórico">
+          <button data-act="mk-hist" data-h="compras" aria-pressed="true">Compras</button>
+          <button data-act="mk-hist" data-h="produtos" aria-pressed="false">Produtos e preços</button>
+        </div>
+        <input id="mk-busca" type="search" placeholder="Buscar produto ou mercado" aria-label="Buscar no histórico">
+        <div id="mk-hist" class="view" style="gap:10px"></div>
+      </div>
+
+      <form id="f-comecar" class="card" autocomplete="off">
+        <h3>Começar a compra</h3>
+        <p class="muted small" style="margin:0">No mercado, fotografe a etiqueta de cada produto que pegar. O app lê nome e preço, risca da lista e soma o total. No fim, a compra vira um gasto do mês.</p>
+        <div class="field"><label for="mk-loja">Mercado</label><input id="mk-loja" type="text" placeholder="Ex.: Fort Atacadista" list="dl-lojas" maxlength="60" required></div>
+        <button class="btn primary big" type="submit">Começar compra</button>
+      </form>
+    </div>
+
+    <!-- compra em andamento -->
+    <div id="mk-comprando" class="view" hidden>
+      <div class="card">
+        <div class="sum"><div><div id="mk-loja-nome" class="loja"></div><div id="mk-inicio" class="small muted"></div></div><div id="mk-total-top"></div></div>
+        <label class="btn primary big" for="mk-foto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          Fotografar etiqueta
+        </label>
+        <input id="mk-foto" class="file-in" type="file" accept="image/*" capture="environment">
+        <button class="btn" type="button" data-act="mk-manual">Adicionar sem foto</button>
+      </div>
+
+      <form id="f-etq" class="card capture" hidden autocomplete="off">
+        <div class="cap-top">
+          <img id="etq-img" class="cap-img" alt="Foto da etiqueta" hidden>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+            <div id="etq-status" class="status"></div>
+            <button type="button" class="btn ghost" id="etq-reler" data-act="etq-reler" hidden style="align-self:flex-start">Ler de novo com mais atenção</button>
+          </div>
+        </div>
+        <div class="field"><label for="etq-nome">Descrição</label><input id="etq-nome" type="text" required maxlength="100" list="dl-produtos" placeholder="Ex.: Café Pilão Tradicional 500g"></div>
+        <div class="grid3">
+          <div class="field"><label for="etq-preco">Preço (R$)</label><input id="etq-preco" type="text" inputmode="decimal" placeholder="0,00"></div>
+          <div class="field"><label for="etq-un">Vendido por</label><select id="etq-un"><option value="un">unidade</option><option value="kg">kg</option><option value="L">litro</option></select></div>
+          <div class="field span"><label for="etq-qtd">Quantidade</label><input id="etq-qtd" type="text" inputmode="decimal" value="1"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label for="etq-lista">Riscar da lista</label><select id="etq-lista"></select></div>
+          <div class="field"><label for="etq-cat">Categoria</label><select id="etq-cat"></select></div>
+        </div>
+        <div id="etq-comp" class="compare"></div>
+        <div class="sum"><span class="muted small">Total do item</span><span id="etq-total" class="tag lg"></span></div>
+        <div class="actions"><button type="button" class="btn" data-act="etq-descartar">Descartar</button><button type="submit" class="btn primary">Pôr no carrinho</button></div>
+      </form>
+
+      <div class="card" id="mk-hoje-card" hidden><div class="sum"><h3>Lista de hoje</h3><span id="mk-hoje-sum" class="muted small"></span></div><div id="mk-hoje"></div></div>
+      <div class="card"><div class="sum"><h3>No carrinho</h3><span id="mk-cart-sum" class="muted small"></span></div><div id="mk-cart"></div></div>
+      <div class="card">
+        <h3>Finalizar</h3>
+        <div class="grid2">
+          <div class="field"><label for="mk-quem">Quem pagou</label><input id="mk-quem" type="text" list="dl-quem" maxlength="40"></div>
+          <div class="field"><label for="mk-pag">Pagamento</label><select id="mk-pag" data-pagto="mk"></select></div>
+          <div class="field" id="mk-cartao-wrap" hidden><label for="mk-cartao">Cartão</label><select id="mk-cartao" data-pagto="mk"></select></div>
+          <div class="field" id="mk-parc-wrap" hidden><label for="mk-parc">Parcelas</label><select id="mk-parc" data-pagto="mk"></select></div>
+        </div>
+        <div id="mk-parc-info" class="note small" hidden></div>
+        <div class="actions">
+          <button class="btn danger" type="button" data-act="mk-cancelar" data-confirm="Toque de novo para cancelar">Cancelar compra</button>
+          <button class="btn primary" type="button" data-act="mk-finalizar" data-confirm="Toque de novo para finalizar">Finalizar compra</button>
+        </div>
+        <p class="muted small" style="margin:0">Depois, ao ler o QR code da nota fiscal, o app troca esta compra pelos valores exatos da nota.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTA -->
+  <section id="v-conta" class="view" hidden>
+    <h2 id="c-ola"></h2>
+    <div class="card"><h3>Pessoas da casa</h3><div id="c-pessoas" class="list"></div>
+      <form id="f-convite" class="convidar" autocomplete="off" hidden>
+        <div class="row-form"><div class="field grow"><label for="c-nome">Convidar pessoa</label><input id="c-nome" type="text" placeholder="Nome dela, ex.: Ana" maxlength="30" required></div><button class="btn primary" type="submit">Gerar convite</button></div>
+      </form>
+      <div id="c-convite" class="note" hidden></div>
+    </div>
+    <button class="btn" data-act="ir" data-v="ajustes">Categorias, cartões, gastos fixos e aparência</button>
+    <form id="f-senha" class="card" autocomplete="off">
+      <h3>Trocar minha senha</h3>
+      <div class="grid2">
+        <div class="field"><label for="s-atual">Senha atual</label><input id="s-atual" type="password" autocomplete="current-password" required></div>
+        <div class="field"><label for="s-nova">Nova senha</label><input id="s-nova" type="password" autocomplete="new-password" minlength="6" required></div>
+      </div>
+      <button class="btn" type="submit">Trocar senha</button>
+    </form>
+    <div class="card" id="c-importar" hidden>
+      <h3>Trazer dados do app antigo</h3>
+      <p class="muted small" style="margin:0">Escolha o arquivo de backup (<code>.json</code>) do app antigo. Gastos, notas, gastos fixos, lista de compras, preços e categorias aprendidas entram aqui. Pode repetir sem duplicar.</p>
+      <label class="btn" for="c-arquivo">Escolher arquivo de backup</label>
+      <input id="c-arquivo" class="file-in" type="file" accept=".json,application/json">
+      <div id="c-import-msg" class="small muted"></div>
+    </div>
+    <button class="btn danger" data-act="sair" data-confirm="Toque de novo para sair">Sair deste celular</button>
+  </section>
+
+  <!-- PAINEL (receitas x gastos) -->
+  <section id="v-painel" class="view" hidden>
+    <div class="mes"><button class="icon" data-act="mes" data-d="-1" aria-label="Mês anterior">‹</button><h2 id="p-mes"></h2><button class="icon" data-act="mes" data-d="1" aria-label="Próximo mês">›</button></div>
+    <div class="kpi-grid" id="p-kpis"></div>
+    <div class="card"><div class="sum"><h3>Receitas x gastos</h3><div class="legenda"><span><i class="lg-rec"></i>Receitas</span><span><i class="lg-gas"></i>Gastos</span><span><i class="lg-sal"></i>Saldo</span></div></div><div id="p-grafico" class="grafico"></div><div id="p-tabela" class="tbl"></div></div>
+    <div class="card"><div class="sum"><h3>Para onde vai o dinheiro</h3><span class="small muted" id="p-comp-mes"></span></div><div id="p-comp" class="bars"></div></div>
+    <div class="card"><div class="sum"><h3>Próximos meses</h3><span class="small muted">o que já está comprometido</span></div><div id="p-futuro" class="tbl"></div></div>
+    <div class="card" id="p-parc-card"><div class="sum"><h3>Compras parceladas em aberto</h3><span id="p-parc-sum" class="small muted"></span></div><div id="p-parc"></div></div>
+    <div class="card"><h3>Quem trouxe e quem gastou</h3><div id="p-pessoas" class="tbl"></div></div>
+  </section>
+
+  <!-- RECEITAS -->
+  <section id="v-receitas" class="view" hidden>
+    <div class="mes"><button class="icon" data-act="mes" data-d="-1" aria-label="Mês anterior">‹</button><h2 id="rc-mes"></h2><button class="icon" data-act="mes" data-d="1" aria-label="Próximo mês">›</button></div>
+    <div class="card hero">
+      <div class="k">Receitas do mês</div>
+      <div id="rc-total"></div>
+      <div id="rc-saldo" class="small muted"></div>
+    </div>
+    <div class="card" id="rc-tipos-card"><h3>Por tipo</h3><div id="rc-tipos" class="bars"></div></div>
+    <div class="card"><div class="sum"><h3>Lançamentos</h3><span id="rc-qtd" class="small muted"></span></div><div id="rc-lista" class="list"></div></div>
+    <form id="f-receita" class="card" autocomplete="off">
+      <h3 id="rc-form-titulo">Nova receita</h3>
+      <div class="grid2">
+        <div class="field"><label for="rc-valor">Valor (R$)</label><input id="rc-valor" type="text" inputmode="decimal" placeholder="0,00" required></div>
+        <div class="field"><label for="rc-data">Data</label><input id="rc-data" type="date" required></div>
+      </div>
+      <div class="field"><label>Tipo</label><div id="rc-tipos-chips" class="chips"></div></div>
+      <div class="field"><label for="rc-desc">Descrição</label><input id="rc-desc" type="text" placeholder="Ex.: Salário, bônus de fim de ano, freela do site" maxlength="120"></div>
+      <div class="field"><label for="rc-quem">De quem</label><input id="rc-quem" type="text" list="dl-quem" maxlength="40"></div>
+      <label class="check-row" id="rc-repetir-row"><input id="rc-repetir" type="checkbox"><span><strong>Repetir todo mês</strong><small>Para salários: o app lança sozinho nos próximos meses, no mesmo dia.</small></span></label>
+      <div class="actions">
+        <button class="btn" type="button" data-act="rc-cancelar" id="rc-cancelar" hidden>Cancelar</button>
+        <button class="btn danger" type="button" data-act="rc-apagar" id="rc-apagar" data-confirm="Toque de novo para apagar" hidden>Apagar</button>
+        <button class="btn primary" type="submit" id="rc-salvar">Salvar receita</button>
+      </div>
+    </form>
+    <div class="card"><div class="sum"><h3>Receitas fixas (todo mês)</h3></div><div id="rc-fixos"></div></div>
+  </section>
+
+  <!-- AJUSTES -->
+  <section id="v-ajustes" class="view" hidden>
+    <h2>Ajustes</h2>
+    <div class="seg" role="group" aria-label="Ajustes">
+      <button data-act="aj-aba" data-aba="categorias" aria-pressed="true">Categorias</button>
+      <button data-act="aj-aba" data-aba="cartoes" aria-pressed="false">Cartões</button>
+      <button data-act="aj-aba" data-aba="fixos" aria-pressed="false">Fixos</button>
+      <button data-act="aj-aba" data-aba="visual" aria-pressed="false">Visual</button>
+    </div>
+
+    <div id="aj-categorias" class="view">
+      <p class="muted small" style="margin:0">Toque numa categoria para renomear, trocar a cor, definir o orçamento do mês ou juntar com outra. As setas mudam a ordem.</p>
+      <div class="card"><div id="aj-cats"></div></div>
+      <form id="f-cat-nova" class="card" autocomplete="off">
+        <h3>Nova categoria</h3>
+        <div class="row-form">
+          <div class="field grow"><label for="cn-nome">Nome</label><input id="cn-nome" type="text" maxlength="40" placeholder="Ex.: Academia, Filhos, Presentes" required></div>
+          <div class="field"><label for="cn-cor">Cor</label><input id="cn-cor" type="color" value="#5662C9"></div>
+        </div>
+        <div class="field"><label for="cn-orc">Orçamento por mês (opcional)</label><input id="cn-orc" type="text" inputmode="decimal" placeholder="Ex.: 300,00"></div>
+        <button class="btn primary" type="submit">Criar categoria</button>
+      </form>
+    </div>
+
+    <div id="aj-cartoes" class="view" hidden>
+      <p class="muted small" style="margin:0">Cadastre os cartões para escolher em cada compra. Com o dia de fechamento, a compra feita depois dele já cai no mês seguinte.</p>
+      <div class="card"><div id="aj-cards"></div></div>
+      <form id="f-cartao" class="card" autocomplete="off">
+        <h3 id="ct-titulo">Novo cartão</h3>
+        <div class="grid2">
+          <div class="field"><label for="ct-nome">Nome</label><input id="ct-nome" type="text" maxlength="30" placeholder="Ex.: Nubank Renato" required></div>
+          <div class="field"><label for="ct-final">Final (4 dígitos)</label><input id="ct-final" type="text" inputmode="numeric" maxlength="4" placeholder="1234"></div>
+          <div class="field"><label for="ct-fech">Dia de fechamento</label><input id="ct-fech" type="number" min="1" max="31" placeholder="Ex.: 25"></div>
+          <div class="field"><label for="ct-venc">Dia de vencimento</label><input id="ct-venc" type="number" min="1" max="31" placeholder="Ex.: 5"></div>
+          <div class="field"><label for="ct-dono">Titular</label><input id="ct-dono" type="text" list="dl-quem" maxlength="40"></div>
+          <div class="field"><label for="ct-cor">Cor</label><input id="ct-cor" type="color" value="#5662C9"></div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" data-act="ct-cancelar" id="ct-cancelar" hidden>Cancelar</button>
+          <button class="btn danger" type="button" data-act="ct-apagar" id="ct-apagar" data-confirm="Toque de novo para remover" hidden>Remover</button>
+          <button class="btn primary" type="submit">Salvar cartão</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="aj-fixos" class="view" hidden>
+      <p class="muted small" style="margin:0">Gastos que o app lança sozinho todo mês. Toque para mudar valor, dia, categoria, pagamento ou o último mês. A mudança vale deste mês em diante; meses passados ficam como estão.</p>
+      <div class="card"><div id="aj-fixos-lista"></div></div>
+      <button class="btn" data-act="novo-fixo">+ Novo gasto fixo</button>
+    </div>
+
+    <div id="aj-visual" class="view" hidden>
+      <div class="card">
+        <h3>Cor do app</h3>
+        <div id="aj-cores" class="cores"></div>
+        <p class="muted small" style="margin:0">Vale para este celular.</p>
+      </div>
+      <div class="card">
+        <h3>Ordem das abas</h3>
+        <div id="aj-abas"></div>
+        <button class="btn ghost" data-act="abas-padrao">Voltar à ordem padrão</button>
+      </div>
+      <div class="card">
+        <h3>Abrir o app em</h3>
+        <select id="aj-inicio"><option value="resumo">Resumo do mês</option><option value="painel">Painel</option><option value="lancar">Lançar</option><option value="gastos">Gastos</option><option value="receitas">Receitas</option><option value="mercado">Mercado</option></select>
+      </div>
+    </div>
+  </section>
+
+  <!-- FIXO (edição) -->
+  <section id="v-fixo" class="view" hidden>
+    <form id="f-fixo" class="card" autocomplete="off">
+      <h2 id="fx-titulo">Gasto fixo</h2>
+      <div id="fx-status" class="note" hidden></div>
+      <div class="field"><label for="fx-desc">Descrição</label><input id="fx-desc" type="text" maxlength="120" required></div>
+      <div class="grid2">
+        <div class="field"><label for="fx-valor">Valor (R$)</label><input id="fx-valor" type="text" inputmode="decimal" required></div>
+        <div class="field"><label for="fx-dia">Dia do lançamento</label><input id="fx-dia" type="number" min="1" max="31" required></div>
+        <div class="field"><label for="fx-inicio">Primeiro mês</label><input id="fx-inicio" type="month" required></div>
+        <div class="field"><label for="fx-fim">Último mês (vazio = sem fim)</label><input id="fx-fim" type="month"></div>
+      </div>
+      <div class="field"><label>Categoria</label><div id="fx-cats" class="chips"></div></div>
+      <div class="grid2">
+        <div class="field"><label for="fx-quem">Quem paga</label><input id="fx-quem" type="text" list="dl-quem" maxlength="40"></div>
+        <div class="field"><label for="fx-pag">Pagamento</label><select id="fx-pag"></select></div>
+        <div class="field" id="fx-cartao-wrap" hidden><label for="fx-cartao">Cartão</label><select id="fx-cartao"></select></div>
+      </div>
+      <div class="actions">
+        <button class="btn" type="button" data-act="voltar-ajustes">Voltar</button>
+        <button class="btn danger" type="button" data-act="fx-apagar" id="fx-apagar" data-confirm="Toque de novo para excluir" hidden>Excluir</button>
+        <button class="btn primary" type="submit">Salvar</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- RESUMO -->
+  <section id="v-resumo" class="view" hidden>
+    <div class="mes"><button class="icon" data-act="mes" data-d="-1" aria-label="Mês anterior">‹</button><h2 id="r-mes"></h2><button class="icon" data-act="mes" data-d="1" aria-label="Próximo mês">›</button></div>
+    <div class="card hero">
+      <div class="k">Gasto no mês</div>
+      <div id="r-total"></div>
+      <div id="r-comp" class="small muted"></div>
+      <div id="r-kpis" class="kpis"></div>
+    </div>
+    <div class="card" id="r-orc-card" hidden><div class="sum"><h3>Orçamento do mês</h3><span id="r-orc-sum" class="small muted"></span></div><div id="r-orc"></div></div>
+    <div class="card"><div class="sum"><h3>Por categoria</h3><span class="small muted">toque para ver os gastos</span></div><div id="r-donut" class="donut-wrap"></div><div id="r-cats" class="bars"></div></div>
+    <div class="card" id="r-tipo-card"><div class="sum"><h3>Fixos, parcelas e variáveis</h3></div><div id="r-tipo" class="bars"></div></div>
+    <div class="card" id="r-pag-card"><h3>Como foi pago</h3><div id="r-pag" class="bars"></div></div>
+    <div class="card" id="r-pessoas-card"><h3>Quem pagou</h3><div id="r-pessoas" class="bars"></div></div>
+    <div class="card"><div class="sum"><h3>Últimos lançamentos</h3><button class="btn ghost small" data-act="ir" data-v="gastos">Ver todos</button></div><div id="r-ultimos"></div></div>
+  </section>
+
+  <!-- LANÇAR -->
+  <section id="v-lancar" class="view" hidden>
+    <h2>Lançar gasto</h2>
+    <button class="btn primary huge" data-act="scan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg>
+      <span><strong>Ler QR code da nota</strong><small>Itens, valores e categorias entram sozinhos</small></span>
+    </button>
+    <div class="actions">
+      <label class="btn" for="qr-foto">Foto do QR code</label>
+      <input id="qr-foto" class="file-in" type="file" accept="image/*">
+      <button class="btn" data-act="colar">Colar link da nota</button>
+    </div>
+    <form id="f-link" class="card" hidden autocomplete="off">
+      <div class="field"><label for="l-url">Link da consulta da NFC-e</label><input id="l-url" type="url" placeholder="https://www.dfe.ms.gov.br/nfce/qrcode?p=…" required></div>
+      <button class="btn primary" type="submit">Buscar nota</button>
+    </form>
+    <div class="sep"><span>ou</span></div>
+    <form id="f-manual" class="card" autocomplete="off">
+      <h3>Lançamento manual</h3>
+      <div class="grid2">
+        <div class="field"><label for="m-valor">Valor (R$)</label><input id="m-valor" type="text" inputmode="decimal" placeholder="0,00" required></div>
+        <div class="field"><label for="m-data">Data</label><input id="m-data" type="date" required></div>
+      </div>
+      <div class="field"><label for="m-desc">Descrição</label><input id="m-desc" type="text" placeholder="Ex.: Conta de luz, farmácia, gasolina" required maxlength="120"></div>
+      <div class="field"><label>Categoria</label><div id="m-cats" class="chips"></div></div>
+      <div class="field" id="m-sug-wrap" hidden><label>Sugestões</label><div id="m-sug" class="chips"></div></div>
+      <label class="check-row"><input id="m-repetir" type="checkbox"><span><strong>Repetir todo mês</strong><small>Para financiamentos, streaming e contas fixas: o app lança sozinho nos próximos meses.</small></span></label>
+      <div class="grid2">
+        <div class="field"><label for="m-quem">Quem pagou</label><input id="m-quem" type="text" list="dl-quem" maxlength="40"></div>
+        <div class="field"><label for="m-pag">Pagamento</label><select id="m-pag" data-pagto="m"></select></div>
+        <div class="field" id="m-cartao-wrap" hidden><label for="m-cartao">Cartão</label><select id="m-cartao" data-pagto="m"></select></div>
+        <div class="field" id="m-parc-wrap" hidden><label for="m-parc">Parcelas</label><select id="m-parc" data-pagto="m"></select></div>
+      </div>
+      <div id="m-parc-info" class="note small" hidden></div>
+      <button class="btn primary big" type="submit">Salvar gasto</button>
+    </form>
+  </section>
+
+  <!-- GASTOS -->
+  <section id="v-gastos" class="view" hidden>
+    <div class="mes"><button class="icon" data-act="mes" data-d="-1" aria-label="Mês anterior">‹</button><h2 id="g-mes"></h2><button class="icon" data-act="mes" data-d="1" aria-label="Próximo mês">›</button></div>
+    <div id="g-filtro" class="chips scroll"></div>
+    <div id="g-lista"></div>
+  </section>
+
+  <!-- NOTA (revisão antes de salvar) e DETALHE -->
+  <section id="v-nota" class="view" hidden>
+    <div class="card">
+      <div class="sum"><div><div id="n-loja" class="loja"></div><div id="n-meta" class="small muted"></div></div><div id="n-total"></div></div>
+      <div id="n-aviso" class="note" hidden></div>
+      <div class="grid2" id="n-campos">
+        <div class="field"><label for="n-quem">Quem pagou</label><input id="n-quem" type="text" list="dl-quem" maxlength="40"></div>
+        <div class="field"><label for="n-data">Data</label><input id="n-data" type="date"></div>
+      </div>
+      <div class="grid2" id="n-valor-wrap" hidden>
+        <div class="field"><label for="n-valor">Valor (R$)</label><input id="n-valor" type="text" inputmode="decimal"></div>
+      </div>
+      <div class="field" id="n-desc-wrap"><label for="n-desc">Descrição</label><input id="n-desc" type="text" maxlength="120"></div>
+      <div id="n-fixo" class="note" hidden></div>
+      <div class="field" id="n-cat-wrap" hidden><label>Categoria</label><div id="n-cats" class="chips"></div></div>
+    </div>
+    <div class="card" id="n-pag-card">
+      <h3>Pagamento</h3>
+      <div class="grid2">
+        <div class="field"><label for="n-pag">Forma de pagamento</label><select id="n-pag" data-pagto="n"></select></div>
+        <div class="field" id="n-cartao-wrap" hidden><label for="n-cartao">Cartão</label><select id="n-cartao" data-pagto="n"></select></div>
+        <div class="field" id="n-parc-wrap" hidden><label for="n-parc">Parcelas</label><select id="n-parc" data-pagto="n"></select></div>
+      </div>
+      <div id="n-parc-info" class="note small" hidden></div>
+    </div>
+    <div class="card" id="n-resumo-card"><h3>Por categoria</h3><div id="n-resumo" class="bars"></div></div>
+    <div id="n-itens"></div>
+    <div class="actions sticky-actions">
+      <button class="btn" data-act="voltar">Voltar</button>
+      <button class="btn danger" id="n-apagar" data-act="apagar" data-confirm="Toque de novo para apagar" hidden>Apagar</button>
+      <button class="btn primary" id="n-salvar" data-act="salvar-nota">Salvar gasto</button>
+    </div>
+  </section>
+</main>
+
+<datalist id="dl-quem"></datalist>
+<datalist id="dl-produtos"></datalist>
+<datalist id="dl-lojas"></datalist>
+<div id="mk-barra" class="mk-barra" hidden><div class="in"><div><div class="k">Total do carrinho</div><div id="mk-barra-meta" class="small muted"></div></div><div id="mk-barra-total"></div></div></div>
+
+<!-- câmera -->
+<div id="scanner" class="scanner" hidden>
+  <video id="sc-video" playsinline muted></video>
+  <div class="sc-frame"></div>
+  <p id="sc-msg" class="sc-msg">Aponte para o QR code no rodapé da nota</p>
+  <button class="btn big sc-sair" data-act="scan-sair">Cancelar</button>
+</div>
+<div id="carregando" class="carregando" hidden><div class="spinner"></div><p id="car-msg">Buscando a nota na SEFAZ…</p></div>
+
+<nav class="tabs" id="tabs" aria-label="Seções" hidden><div class="in">
+  <button data-act="ir" data-v="resumo" data-tab="resumo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Resumo</button>
+  <button data-act="ir" data-v="painel" data-tab="painel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-5 4 4 8-9"/><path d="M15 7h5v5"/></svg>Painel</button>
+  <button data-act="ir" data-v="lancar" data-tab="lancar" class="tab-lancar"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Lançar</button>
+  <button data-act="ir" data-v="gastos" data-tab="gastos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Gastos</button>
+  <button data-act="ir" data-v="receitas" data-tab="receitas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>Receitas</button>
+  <button data-act="ir" data-v="mercado" data-tab="mercado"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 4h2l2.4 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6.2"/><circle cx="9" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></svg>Mercado<span class="badge" id="b-mercado" hidden></span></button>
+</div></nav>
+<div id="toast" class="toast" hidden role="status"></div>
+
+<script src="vendor/jsQR.js" defer></script>
+<script src="config.js?v=9"></script>
+<script type="module" src="app.mjs?v=9"></script>
+</body>
+</html>

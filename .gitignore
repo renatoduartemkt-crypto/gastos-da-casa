@@ -1,0 +1,4 @@
+node_modules/
+*.backup.json
+netlify-blobs.json
+.DS_Store
