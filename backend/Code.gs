@@ -25,7 +25,7 @@
  *   ANTHROPIC_API_KEY  (opcional) liga a leitura de etiquetas por foto no Mercado.
  */
 
-const VERSAO = '2026-11-15';
+const VERSAO = '2026-11-15b';
 const TZ = 'America/Campo_Grande';
 
 /* ======================= entrada ======================= */
@@ -854,7 +854,9 @@ function urlPermitida_(raw) {
   const host = m[2].toLowerCase(), resto = m[4] || '/';
   if (!/\.gov\.br$/.test(host)) return null;
   if (!/nfc|nfe|qrcode|consulta/i.test(resto)) return null;
-  return 'https://' + host + resto;
+  // O link do QR code traz "|" (p=chave|2|1|1|hash): o UrlFetchApp do Google recusa esse caractere sem codificar.
+  const seguro = resto.replace(/[|\s"<>\\^`{}]/g, c => encodeURIComponent(c));
+  return 'https://' + host + seguro;
 }
 function chaveDaUrl_(raw) {
   const m = String(raw).match(/[?&]p=(\d{44})/) || String(raw).match(/(\d{44})/);
@@ -893,22 +895,35 @@ function lerNfce_(html) {
     pagamento: fp ? txt_(fp[1]) : null, bruto: r2(bruto), desconto: r2(desconto), total: r2(total), itens: itens,
   };
 }
+// Busca a página da nota na SEFAZ. A conexão de alguns estados cai de vez em quando: tenta até 3 vezes.
+function baixarNota_(alvo) {
+  const opts = { muteHttpExceptions: true, followRedirects: true, headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36', Accept: 'text/html,application/xhtml+xml', 'Accept-Language': 'pt-BR,pt;q=0.9' } };
+  let ultimo = '';
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    try {
+      const r = UrlFetchApp.fetch(alvo, opts);
+      const cod = r.getResponseCode();
+      if (cod < 400) return r.getContentText();
+      ultimo = 'HTTP ' + cod;
+      if (cod < 500) break;
+    } catch (e) { ultimo = String((e && e.message) || e).slice(0, 160); }
+    console.warn('SEFAZ tentativa ' + tentativa + ': ' + ultimo + ' | ' + alvo.slice(0, 90));
+    if (tentativa < 3) Utilities.sleep(800 * tentativa);
+  }
+  throw new ErroDoUsuario('O site da SEFAZ não respondeu (' + ultimo + '). Tente de novo em alguns minutos ou use "Colar link da nota".', 504);
+}
+
 function importarNota_(s, bruto) {
   const alvo = urlPermitida_(bruto);
   if (!alvo) throw new ErroDoUsuario('Esse QR code não é de uma nota fiscal (NFC-e).');
   const chaveQr = chaveDaUrl_(alvo);
   if (chaveQr && s.get('nf/' + chaveQr)) return { duplicada: true, chave: s.get('nf/' + chaveQr) };
-  let html;
-  try {
-    const r = UrlFetchApp.fetch(alvo, { muteHttpExceptions: true, followRedirects: true, headers: { 'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/124 Mobile Safari/537.36', Accept: 'text/html' } });
-    if (r.getResponseCode() >= 400) throw new ErroDoUsuario('O site da SEFAZ respondeu com erro (' + r.getResponseCode() + '). Tente de novo em alguns minutos.', 502);
-    html = r.getContentText();
-  } catch (e) {
-    if (e instanceof ErroDoUsuario) throw e;
-    throw new ErroDoUsuario('O site da SEFAZ não respondeu. Tente de novo em alguns minutos.', 504);
-  }
+  const html = baixarNota_(alvo);
   let nota;
-  try { nota = lerNfce_(html); } catch (e) { throw new ErroDoUsuario('Não consegui ler os itens dessa nota. Ela pode ainda não estar disponível na SEFAZ; tente mais tarde.', 422); }
+  try { nota = lerNfce_(html); } catch (e) {
+    if (/captcha/i.test(html)) throw new ErroDoUsuario('A SEFAZ pediu uma verificação (captcha) em vez de mostrar a nota. Leia o QR code de novo, com ele inteiro na câmera, ou use "Colar link da nota" com o link completo.', 422);
+    throw new ErroDoUsuario('Não consegui ler os itens dessa nota. Ela pode ainda não estar disponível na SEFAZ; tente mais tarde.', 422);
+  }
   if (nota.chave && s.get('nf/' + nota.chave)) return { duplicada: true, chave: s.get('nf/' + nota.chave) };
   const ap = aprendido_(s);
   nota.itens = nota.itens.map(i => Object.assign(i, categorizar_(s, i.d, i.cod, ap)));
