@@ -4,5 +4,5 @@
  * Veja o passo a passo no README.md.
  */
 window.GASTOS_CONFIG = {
-  backendUrl: ""
+  backendUrl: "https://script.google.com/macros/s/AKfycbxPHJHqexG-kvm33mwOfyKfPOL_YLUMBLZ4SIB3U7vRtvATv5SGj7B8GsdtYq7_RZjI/exec"
 };
